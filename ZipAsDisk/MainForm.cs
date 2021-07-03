@@ -32,13 +32,20 @@ namespace ZipAsDisk
             CDBuilder builder = new CDBuilder();
             builder.UseJoliet = true;
             builder.VolumeIdentifier = "Архив";
+            using(ZipFile zip = ZipFile.Read(archivePath))
+            {
+                zip.ExtractAll("extract\\");
+            }
+            List<Stream> streams = new List<Stream>();
             foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
             {
-
                 Stream s = File.OpenRead(f);
+                streams.Add(s);
                 builder.AddFile(Path.GetFileName(f), s);
             }
             builder.Build(vhdPath);
+            foreach(Stream s in streams)
+                s.Close();
         }
 
         public void MakeVHD(string archivePath, string vhdPath)
@@ -48,10 +55,11 @@ namespace ZipAsDisk
                 zip.ExtractAll("extract\\");
             }
             long filesSize = 0;
+            // problem in filesSize
             foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
                 using(FileStream fs = File.OpenRead(f))
                     filesSize += fs.Length; 
-            long diskSize = filesSize + 30 * 1024 * 1024; // ?
+            long diskSize = 30 * 1024 * 1024; // ?
             //MessageBox.Show((diskSize / 1024).ToString());
             using(var fs = new FileStream(vhdPath, FileMode.OpenOrCreate))
             {
@@ -132,9 +140,14 @@ namespace ZipAsDisk
 
         private void openArchiveAsIso_FileOk(object sender, CancelEventArgs e)
         {
-            MakeISO(openArchive.FileName, "output.iso");
+            MakeISO(openArchiveAsIso.FileName, "output.iso");
             FileSystem.DeleteDirectory("extract/", UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
             Mount(AppDomain.CurrentDomain.BaseDirectory + "output.iso");
+        }
+
+        private void openArchiveAsIsoButton_Click(object sender, EventArgs e)
+        {
+            openArchiveAsIso.ShowDialog();
         }
     }
 }

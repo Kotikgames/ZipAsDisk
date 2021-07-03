@@ -59,6 +59,7 @@ namespace ZipAsDisk
             this.openArchiveAsIsoButton.TabIndex = 1;
             this.openArchiveAsIsoButton.Text = "Открыть как ISO";
             this.openArchiveAsIsoButton.UseVisualStyleBackColor = true;
+            this.openArchiveAsIsoButton.Click += new System.EventHandler(this.openArchiveAsIsoButton_Click);
             // 
             // openArchiveAsIso
             // 
