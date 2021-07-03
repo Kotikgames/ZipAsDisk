@@ -78,10 +78,16 @@ namespace ZipAsDisk
 
                     foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
                     {
-
+                        string dir = Path.GetDirectoryName(f);
+                        dir = dir.Replace("extract", "");
+                        MessageBox.Show(dir);
+                        if(dir != string.Empty)
+                        {
+                            destNtfs.CreateDirectory(dir);
+                        }
                         using(Stream s = File.OpenRead(f))
                         {
-                            using(Stream stream = destNtfs.OpenFile(Path.GetFileName(f), FileMode.Create))
+                            using(Stream stream = destNtfs.OpenFile(dir + "\\" + Path.GetFileName(f), FileMode.Create))
                             {
                                 try
                                 {
