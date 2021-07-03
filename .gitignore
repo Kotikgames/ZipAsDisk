@@ -1,0 +1,7 @@
+.vs/
+ZipAsDisk/obj/
+ZipAsDisk/bin/Debug/Debug.zip
+packages/
+ZipAsDiskCmd/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ZipAsDiskCmd/obj/
+ZipAsDisk/bin/
