@@ -47,15 +47,15 @@ namespace ZipAsDisk
             {
                 zip.ExtractAll("extract\\");
             }
-            long zipSize = 0;
-            using(FileStream fs = File.OpenRead(archivePath)) {
-                zipSize = fs.Length;
-            }
-            long diskSize = zipSize * 1024 * 1024 + 1024; // ?
+            long filesSize = 0;
+            foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
+                using(FileStream fs = File.OpenRead(f))
+                    filesSize += fs.Length; 
+            long diskSize = filesSize + 30 * 1024 * 1024; // ?
+            //MessageBox.Show((diskSize / 1024).ToString());
             using(var fs = new FileStream(vhdPath, FileMode.OpenOrCreate))
             {
                 VirtualDisk destDisk = Disk.InitializeDynamic(fs, DiscUtils.Streams.Ownership.None, diskSize);
-
 
                 BiosPartitionTable.Initialize(destDisk, WellKnownPartitionType.WindowsNtfs);
                 var volMgr = new VolumeManager(destDisk);
@@ -64,6 +64,7 @@ namespace ZipAsDisk
 
                 using(var destNtfs = NtfsFileSystem.Format(volMgr.GetLogicalVolumes()[0], label, new NtfsFormatOptions()))
                 {
+                    //MessageBox.Show((destNtfs.UsedSpace / 1024).ToString());
                     destNtfs.NtfsOptions.ShortNameCreation = ShortFileNameOption.Disabled;
 
                     foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
@@ -73,8 +74,15 @@ namespace ZipAsDisk
                         {
                             using(Stream stream = destNtfs.OpenFile(Path.GetFileName(f), FileMode.Create))
                             {
-                                s.CopyTo(stream);
-                                stream.Flush();
+                                try
+                                {
+                                    s.CopyTo(stream);
+                                    stream.Flush();
+                                }catch(IOException e)
+                                {
+                                    MessageBox.Show(e.Message);
+                                    MessageBox.Show((destNtfs.AvailableSpace / 1024).ToString());
+                                }
                             }
                         }
                     }
