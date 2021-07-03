@@ -17,6 +17,7 @@ using Microsoft.VisualBasic.FileIO;
 using DiscUtils.Ntfs;
 using System.Management.Automation;
 using DiscUtils.Iso9660;
+using System.Diagnostics;
 
 namespace ZipAsDisk
 {
@@ -59,7 +60,7 @@ namespace ZipAsDisk
             foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
                 using(FileStream fs = File.OpenRead(f))
                     filesSize += fs.Length; 
-            long diskSize = 30 * 1024 * 1024; // ?
+            long diskSize =  30 * 1024 * 1024; // ?
             //MessageBox.Show((diskSize / 1024).ToString());
             using(var fs = new FileStream(vhdPath, FileMode.OpenOrCreate))
             {
@@ -84,6 +85,7 @@ namespace ZipAsDisk
                             {
                                 try
                                 {
+                                    statusLabel.Text = "Добавление: " + Path.GetFileName(f);
                                     s.CopyTo(stream);
                                     stream.Flush();
                                 }catch(IOException e)
@@ -100,13 +102,21 @@ namespace ZipAsDisk
             FileSystem.DeleteDirectory("extract/", UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
         }
 
-        public void Mount(string vhdPath)
+        public void Mount(string path, bool isIso = false)
         {
             using(var ps = PowerShell.Create())
             {
                 var command = ps.AddCommand("Mount-DiskImage");
-                command.AddParameter("ImagePath", vhdPath);
-                command.Invoke();
+                command.AddParameter("ImagePath", path);
+                command.AddParameter("PassThru");
+                if(!isIso)
+                    command.AddCommand("Get-Disk").AddCommand("Get-Partition");
+                command.AddCommand("Get-Volume");
+                var result = command.Invoke();
+                // Get Drive Letter 
+                string letter = result[0].Properties["DriveLetter"].Value.ToString();
+                if(openInExplorerCheckBox.Checked)
+                    Process.Start("explorer", letter + ":\\");
                 //MessageBox.Show(command.Streams.Error.ReadAll()[0].ToString());
             }
         }
@@ -123,8 +133,11 @@ namespace ZipAsDisk
 
         private void openArchive_FileOk(object sender, CancelEventArgs e)
         {
+            statusLabel.Text = "Создание VHD";
             MakeVHD(openArchive.FileName, "output.vhd");
+            statusLabel.Text = "Монтирование...";
             Mount(AppDomain.CurrentDomain.BaseDirectory + "output.vhd");
+            statusLabel.Text = "Готово";
         }
 
         private void openArchiveButton_Click(object sender, EventArgs e)
@@ -134,6 +147,7 @@ namespace ZipAsDisk
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            statusLabel.Text = "Размонтирование дисков...";
             Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.vhd");
             Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.iso");
         }
@@ -142,7 +156,7 @@ namespace ZipAsDisk
         {
             MakeISO(openArchiveAsIso.FileName, "output.iso");
             FileSystem.DeleteDirectory("extract/", UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-            Mount(AppDomain.CurrentDomain.BaseDirectory + "output.iso");
+            Mount(AppDomain.CurrentDomain.BaseDirectory + "output.iso", true);
         }
 
         private void openArchiveAsIsoButton_Click(object sender, EventArgs e)

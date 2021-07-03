@@ -33,6 +33,11 @@ namespace ZipAsDisk
             this.openArchive = new System.Windows.Forms.OpenFileDialog();
             this.openArchiveAsIsoButton = new System.Windows.Forms.Button();
             this.openArchiveAsIso = new System.Windows.Forms.OpenFileDialog();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.openInExplorerCheckBox = new System.Windows.Forms.CheckBox();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // openArchiveButton
@@ -67,17 +72,54 @@ namespace ZipAsDisk
             this.openArchiveAsIso.Filter = "ZIP|*.zip";
             this.openArchiveAsIso.FileOk += new System.ComponentModel.CancelEventHandler(this.openArchiveAsIso_FileOk);
             // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusLabel,
+            this.toolStripProgressBar1});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 108);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(418, 22);
+            this.statusStrip1.TabIndex = 2;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripProgressBar1
+            // 
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
+            // 
+            // statusLabel
+            // 
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(43, 17);
+            this.statusLabel.Text = "Статус";
+            // 
+            // openInExplorerCheckBox
+            // 
+            this.openInExplorerCheckBox.AutoSize = true;
+            this.openInExplorerCheckBox.Location = new System.Drawing.Point(12, 70);
+            this.openInExplorerCheckBox.Name = "openInExplorerCheckBox";
+            this.openInExplorerCheckBox.Size = new System.Drawing.Size(142, 17);
+            this.openInExplorerCheckBox.TabIndex = 3;
+            this.openInExplorerCheckBox.Text = "Открыть в проводнике";
+            this.openInExplorerCheckBox.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(418, 130);
+            this.Controls.Add(this.openInExplorerCheckBox);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.openArchiveAsIsoButton);
             this.Controls.Add(this.openArchiveButton);
             this.Name = "MainForm";
             this.Text = "ZipAsDisk";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -87,6 +129,10 @@ namespace ZipAsDisk
         private System.Windows.Forms.OpenFileDialog openArchive;
         private System.Windows.Forms.Button openArchiveAsIsoButton;
         private System.Windows.Forms.OpenFileDialog openArchiveAsIso;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel statusLabel;
+        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
+        private System.Windows.Forms.CheckBox openInExplorerCheckBox;
     }
 }
 
