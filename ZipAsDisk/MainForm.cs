@@ -133,6 +133,8 @@ namespace ZipAsDisk
 
         private void openArchive_FileOk(object sender, CancelEventArgs e)
         {
+            statusLabel.Text = "Размонтирование диска...";
+            Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.vhd");
             statusLabel.Text = "Создание VHD";
             MakeVHD(openArchive.FileName, "output.vhd");
             statusLabel.Text = "Монтирование...";
@@ -154,9 +156,14 @@ namespace ZipAsDisk
 
         private void openArchiveAsIso_FileOk(object sender, CancelEventArgs e)
         {
+            statusLabel.Text = "Размонтирование диска...";
+            Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.iso");
+            statusLabel.Text = "Создание ISO";
             MakeISO(openArchiveAsIso.FileName, "output.iso");
             FileSystem.DeleteDirectory("extract/", UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+            statusLabel.Text = "Монтирование...";
             Mount(AppDomain.CurrentDomain.BaseDirectory + "output.iso", true);
+            statusLabel.Text = "Готово";
         }
 
         private void openArchiveAsIsoButton_Click(object sender, EventArgs e)
