@@ -12,37 +12,45 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DiscUtils.Vhd;
 using DiscUtils.Fat;
-using Ionic.Zip;
 using Microsoft.VisualBasic.FileIO;
 using DiscUtils.Ntfs;
 using System.Management.Automation;
 using DiscUtils.Iso9660;
 using System.Diagnostics;
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace ZipAsDisk
 {
     public partial class MainForm : Form
     {
+        private string archivePath;
         public MainForm()
         {
             InitializeComponent();
+            ZipStrings.UseUnicode = true;
         }
+
 
         public void MakeISO(string archivePath, string vhdPath)
         {
             CDBuilder builder = new CDBuilder();
             builder.UseJoliet = true;
             builder.VolumeIdentifier = "Архив";
-            using(ZipFile zip = ZipFile.Read(archivePath))
-            {
-                zip.ExtractAll("extract\\");
-            }
+            FastZip zip = new FastZip();
+            zip.ExtractZip(archivePath, "extract\\", null);
             List<Stream> streams = new List<Stream>();
             foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
             {
+                string dir = Path.GetDirectoryName(f);
+                dir = dir.Replace("extract", "");
+                if(dir != string.Empty)
+                {
+                    builder.AddDirectory(dir);
+                }
                 Stream s = File.OpenRead(f);
                 streams.Add(s);
-                builder.AddFile(Path.GetFileName(f), s);
+                builder.AddFile(dir + '\\' + Path.GetFileName(f), s);
             }
             builder.Build(vhdPath);
             foreach(Stream s in streams)
@@ -51,16 +59,14 @@ namespace ZipAsDisk
 
         public void MakeVHD(string archivePath, string vhdPath)
         {
-            using(ZipFile zip = ZipFile.Read(archivePath))
-            {
-                zip.ExtractAll("extract\\");
-            }
+            FastZip zip = new FastZip();
+            zip.ExtractZip(archivePath, "extract\\", null);
             long filesSize = 0;
             // problem in filesSize
             foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
                 using(FileStream fs = File.OpenRead(f))
                     filesSize += fs.Length; 
-            long diskSize =  30 * 1024 * 1024; // ?
+            long diskSize =  60 * 1024 * 1024; // ?
             //MessageBox.Show((diskSize / 1024).ToString());
             using(var fs = new FileStream(vhdPath, FileMode.OpenOrCreate))
             {
@@ -80,14 +86,13 @@ namespace ZipAsDisk
                     {
                         string dir = Path.GetDirectoryName(f);
                         dir = dir.Replace("extract", "");
-                        MessageBox.Show(dir);
                         if(dir != string.Empty)
                         {
                             destNtfs.CreateDirectory(dir);
                         }
                         using(Stream s = File.OpenRead(f))
                         {
-                            using(Stream stream = destNtfs.OpenFile(dir + "\\" + Path.GetFileName(f), FileMode.Create))
+                            using(Stream stream = destNtfs.OpenFile(dir + '\\' + Path.GetFileName(f), FileMode.Create))
                             {
                                 try
                                 {
@@ -123,6 +128,8 @@ namespace ZipAsDisk
                 string letter = result[0].Properties["DriveLetter"].Value.ToString();
                 if(openInExplorerCheckBox.Checked)
                     Process.Start("explorer", letter + ":\\");
+                if(!isIso)
+                    diskArchiveChangeWatcher.Path = letter + ":\\";
                 //MessageBox.Show(command.Streams.Error.ReadAll()[0].ToString());
             }
         }
@@ -143,9 +150,11 @@ namespace ZipAsDisk
             Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.vhd");
             statusLabel.Text = "Создание VHD";
             MakeVHD(openArchive.FileName, "output.vhd");
+            archivePath = openArchive.FileName;
             statusLabel.Text = "Монтирование...";
             Mount(AppDomain.CurrentDomain.BaseDirectory + "output.vhd");
             statusLabel.Text = "Готово";
+            diskArchiveChangeWatcher.EnableRaisingEvents = true;
         }
 
         private void openArchiveButton_Click(object sender, EventArgs e)
@@ -175,6 +184,69 @@ namespace ZipAsDisk
         private void openArchiveAsIsoButton_Click(object sender, EventArgs e)
         {
             openArchiveAsIso.ShowDialog();
+        }
+
+        private void applyChanges(object sender, FileSystemEventArgs e)
+        {
+            statusLabel.Text = "Применение изменений...";
+            using(ZipFile zip = new ZipFile(archivePath))
+            {
+                zip.BeginUpdate();
+                try
+                {
+                    if(e.ChangeType == WatcherChangeTypes.Created)
+                    {
+                        FileAttributes attr = FileAttributes.Normal;
+                        try
+                        {
+                            attr = File.GetAttributes(e.FullPath);
+                            if(attr.HasFlag(FileAttributes.Directory))
+                                zip.AddDirectory(e.FullPath);
+                            else
+                                zip.Add(e.FullPath);
+                        }
+                        catch(UnauthorizedAccessException) { }
+                    }
+                    if(e.ChangeType == WatcherChangeTypes.Renamed)
+                    {
+                        RenamedEventArgs renamedEvent = (RenamedEventArgs)e;
+                        FileAttributes attr = FileAttributes.Normal;
+                        try
+                        {
+                            attr = File.GetAttributes(renamedEvent.FullPath);
+                        }
+                        catch(Exception) { }
+                        /*if(attr.HasFlag(FileAttributes.Directory))
+                            zip.UpdateDirectory(renamedEvent.FullPath).FileName = renamedEvent.Name;
+                        else
+                            zip.UpdateFile(renamedEvent.OldFullPath).FileName = renamedEvent.Name;*/
+                    }
+                    if(e.ChangeType == WatcherChangeTypes.Deleted)
+                    {
+                        zip.Delete(zip.GetEntry(Path.GetFileName(e.FullPath)));
+                    }
+                }
+                catch(ArgumentException)
+                {
+
+                }
+                try
+                {
+                    zip.CommitUpdate();
+                }
+                catch(IOException ex)
+                {
+                    MessageBox.Show("Ошибка при сохранении архива: " + ex.Message, "Ошибка сохранения", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    statusLabel.Text = "Ошибка сохранения";
+                }
+            }
+            statusLabel.Text = "Готово";
+        }
+
+
+        private void diskArchiveChangeWatcher_Renamed(object sender, RenamedEventArgs e)
+        {
+            applyChanges(sender, e);
         }
     }
 }

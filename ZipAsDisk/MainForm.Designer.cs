@@ -34,10 +34,12 @@ namespace ZipAsDisk
             this.openArchiveAsIsoButton = new System.Windows.Forms.Button();
             this.openArchiveAsIso = new System.Windows.Forms.OpenFileDialog();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.openInExplorerCheckBox = new System.Windows.Forms.CheckBox();
+            this.diskArchiveChangeWatcher = new System.IO.FileSystemWatcher();
             this.statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.diskArchiveChangeWatcher)).BeginInit();
             this.SuspendLayout();
             // 
             // openArchiveButton
@@ -83,16 +85,16 @@ namespace ZipAsDisk
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // toolStripProgressBar1
-            // 
-            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
-            // 
             // statusLabel
             // 
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Size = new System.Drawing.Size(43, 17);
             this.statusLabel.Text = "Статус";
+            // 
+            // toolStripProgressBar1
+            // 
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             // 
             // openInExplorerCheckBox
             // 
@@ -103,6 +105,14 @@ namespace ZipAsDisk
             this.openInExplorerCheckBox.TabIndex = 3;
             this.openInExplorerCheckBox.Text = "Открыть в проводнике";
             this.openInExplorerCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // diskArchiveChangeWatcher
+            // 
+            this.diskArchiveChangeWatcher.IncludeSubdirectories = true;
+            this.diskArchiveChangeWatcher.SynchronizingObject = this;
+            this.diskArchiveChangeWatcher.Created += new System.IO.FileSystemEventHandler(this.applyChanges);
+            this.diskArchiveChangeWatcher.Deleted += new System.IO.FileSystemEventHandler(this.applyChanges);
+            this.diskArchiveChangeWatcher.Renamed += new System.IO.RenamedEventHandler(this.diskArchiveChangeWatcher_Renamed);
             // 
             // MainForm
             // 
@@ -118,6 +128,7 @@ namespace ZipAsDisk
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.diskArchiveChangeWatcher)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -133,6 +144,7 @@ namespace ZipAsDisk
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.CheckBox openInExplorerCheckBox;
+        private System.IO.FileSystemWatcher diskArchiveChangeWatcher;
     }
 }
 
