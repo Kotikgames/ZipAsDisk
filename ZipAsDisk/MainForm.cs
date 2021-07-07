@@ -223,7 +223,7 @@ namespace ZipAsDisk
                     }
                     if(e.ChangeType == WatcherChangeTypes.Deleted)
                     {
-                        zip.Delete(zip.GetEntry(Path.GetFileName(e.FullPath)));
+                        zip.Delete(zip.GetEntry(e.FullPath.Remove(0, 3).Replace('\\', '/')));
                     }
                 }
                 catch(ArgumentException)
