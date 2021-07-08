@@ -34,7 +34,7 @@ namespace ZipAsDisk
 
         public string GetExtractPath()
         {
-            return Settings.settings.ExtractPath == "Temp" ? Path.GetTempPath() + "\\zipasdisk_extract" : Settings.settings.ExtractPath;
+            return Settings.settings.ExtractPath == "Temp" ? Path.GetTempPath() + "zipasdisk_extract" : Settings.settings.ExtractPath;
         }
 
 
@@ -50,7 +50,7 @@ namespace ZipAsDisk
             foreach(string f in Directory.GetFiles(GetExtractPath(), "*.*", System.IO.SearchOption.AllDirectories))
             {
                 string dir = Path.GetDirectoryName(f);
-                dir = dir.Replace("zipasdisk_extract", "");
+                dir = dir.Replace(GetExtractPath(), "");
                 if(dir != string.Empty)
                 {
                     builder.AddDirectory(dir);
@@ -92,7 +92,7 @@ namespace ZipAsDisk
                     foreach(string f in Directory.GetFiles(GetExtractPath(), "*.*", System.IO.SearchOption.AllDirectories))
                     {
                         string dir = Path.GetDirectoryName(f);
-                        dir = dir.Replace("zipasdisk_extract", "");
+                        dir = dir.Replace(GetExtractPath(), "");
                         if(dir != string.Empty)
                         {
                             destNtfs.CreateDirectory(dir);
@@ -133,7 +133,7 @@ namespace ZipAsDisk
                 var result = command.Invoke();
                 // Get Drive Letter 
                 string letter = result[0].Properties["DriveLetter"].Value.ToString();
-                if(openInExplorerCheckBox.Checked)
+                if(Settings.settings.OpenInExplorer)
                     Process.Start("explorer", letter + ":\\");
                 if(!isIso)
                     diskArchiveChangeWatcher.Path = letter + ":\\";

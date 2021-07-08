@@ -36,7 +36,6 @@ namespace ZipAsDisk
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.openInExplorerCheckBox = new System.Windows.Forms.CheckBox();
             this.diskArchiveChangeWatcher = new System.IO.FileSystemWatcher();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.settingsToolStripItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -99,16 +98,6 @@ namespace ZipAsDisk
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             // 
-            // openInExplorerCheckBox
-            // 
-            this.openInExplorerCheckBox.AutoSize = true;
-            this.openInExplorerCheckBox.Location = new System.Drawing.Point(12, 83);
-            this.openInExplorerCheckBox.Name = "openInExplorerCheckBox";
-            this.openInExplorerCheckBox.Size = new System.Drawing.Size(142, 17);
-            this.openInExplorerCheckBox.TabIndex = 3;
-            this.openInExplorerCheckBox.Text = "Открыть в проводнике";
-            this.openInExplorerCheckBox.UseVisualStyleBackColor = true;
-            // 
             // diskArchiveChangeWatcher
             // 
             this.diskArchiveChangeWatcher.EnableRaisingEvents = true;
@@ -140,7 +129,6 @@ namespace ZipAsDisk
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(420, 141);
-            this.Controls.Add(this.openInExplorerCheckBox);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.openArchiveAsIsoButton);
@@ -168,7 +156,6 @@ namespace ZipAsDisk
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
-        private System.Windows.Forms.CheckBox openInExplorerCheckBox;
         private System.IO.FileSystemWatcher diskArchiveChangeWatcher;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripItem;
