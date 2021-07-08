@@ -29,6 +29,12 @@ namespace ZipAsDisk
         {
             InitializeComponent();
             ZipStrings.UseUnicode = true;
+            Settings.LoadSettings();
+        }
+
+        public string GetExtractPath()
+        {
+            return Settings.settings.ExtractPath == "Temp" ? Path.GetTempPath() + "\\zipasdisk_extract" : Settings.settings.ExtractPath;
         }
 
 
@@ -38,12 +44,13 @@ namespace ZipAsDisk
             builder.UseJoliet = true;
             builder.VolumeIdentifier = "Архив";
             FastZip zip = new FastZip();
-            zip.ExtractZip(archivePath, "extract\\", null);
+            MessageBox.Show(GetExtractPath());
+            zip.ExtractZip(archivePath, GetExtractPath(), null);
             List<Stream> streams = new List<Stream>();
-            foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
+            foreach(string f in Directory.GetFiles(GetExtractPath(), "*.*", System.IO.SearchOption.AllDirectories))
             {
                 string dir = Path.GetDirectoryName(f);
-                dir = dir.Replace("extract", "");
+                dir = dir.Replace("zipasdisk_extract", "");
                 if(dir != string.Empty)
                 {
                     builder.AddDirectory(dir);
@@ -60,12 +67,12 @@ namespace ZipAsDisk
         public void MakeVHD(string archivePath, string vhdPath)
         {
             FastZip zip = new FastZip();
-            zip.ExtractZip(archivePath, "extract\\", null);
+            zip.ExtractZip(archivePath, GetExtractPath(), null);
             long filesSize = 0;
             // problem in filesSize
-            foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
+            /*foreach(string f in Directory.GetFiles(GetExtractPath(), "*.*", System.IO.SearchOption.AllDirectories))
                 using(FileStream fs = File.OpenRead(f))
-                    filesSize += fs.Length; 
+                    filesSize += fs.Length; */
             long diskSize =  60 * 1024 * 1024; // ?
             //MessageBox.Show((diskSize / 1024).ToString());
             using(var fs = new FileStream(vhdPath, FileMode.OpenOrCreate))
@@ -82,10 +89,10 @@ namespace ZipAsDisk
                     //MessageBox.Show((destNtfs.UsedSpace / 1024).ToString());
                     destNtfs.NtfsOptions.ShortNameCreation = ShortFileNameOption.Disabled;
 
-                    foreach(string f in Directory.GetFiles("extract", "*.*", System.IO.SearchOption.AllDirectories))
+                    foreach(string f in Directory.GetFiles(GetExtractPath(), "*.*", System.IO.SearchOption.AllDirectories))
                     {
                         string dir = Path.GetDirectoryName(f);
-                        dir = dir.Replace("extract", "");
+                        dir = dir.Replace("zipasdisk_extract", "");
                         if(dir != string.Empty)
                         {
                             destNtfs.CreateDirectory(dir);
@@ -110,7 +117,7 @@ namespace ZipAsDisk
                 }
                 fs.Flush();
             }
-            FileSystem.DeleteDirectory("extract/", UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+            FileSystem.DeleteDirectory(GetExtractPath(), UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
         }
 
         public void Mount(string path, bool isIso = false)
@@ -175,7 +182,7 @@ namespace ZipAsDisk
             Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.iso");
             statusLabel.Text = "Создание ISO";
             MakeISO(openArchiveAsIso.FileName, "output.iso");
-            FileSystem.DeleteDirectory("extract/", UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+            FileSystem.DeleteDirectory(GetExtractPath(), UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
             statusLabel.Text = "Монтирование...";
             Mount(AppDomain.CurrentDomain.BaseDirectory + "output.iso", true);
             statusLabel.Text = "Готово";
@@ -247,6 +254,11 @@ namespace ZipAsDisk
         private void diskArchiveChangeWatcher_Renamed(object sender, RenamedEventArgs e)
         {
             applyChanges(sender, e);
+        }
+
+        private void settingsToolStripItem_Click(object sender, EventArgs e)
+        {
+            new SettingsForm().ShowDialog();
         }
     }
 }

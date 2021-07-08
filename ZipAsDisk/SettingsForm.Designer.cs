@@ -1,7 +1,7 @@
 ﻿
 namespace ZipAsDisk
 {
-    partial class SettngsForm
+    partial class SettingsForm
     {
         /// <summary>
         /// Required designer variable.
@@ -31,13 +31,13 @@ namespace ZipAsDisk
         {
             this.settingsTabs = new System.Windows.Forms.TabControl();
             this.generalTabPage = new System.Windows.Forms.TabPage();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.customPathSelectButton = new System.Windows.Forms.Button();
+            this.customPathTextBox = new System.Windows.Forms.TextBox();
+            this.customExtractPathRadioButton = new System.Windows.Forms.RadioButton();
+            this.extractInTempRadioButton = new System.Windows.Forms.RadioButton();
             this.openInExplorerCheckBox = new System.Windows.Forms.CheckBox();
             this.vhdTabPage = new System.Windows.Forms.TabPage();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.extractInTempRadioButton = new System.Windows.Forms.RadioButton();
-            this.customExtractPathRadioButton = new System.Windows.Forms.RadioButton();
-            this.customPathTextBox = new System.Windows.Forms.TextBox();
-            this.customPathSelectButton = new System.Windows.Forms.Button();
             this.settingsTabs.SuspendLayout();
             this.generalTabPage.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -66,9 +66,65 @@ namespace ZipAsDisk
             this.generalTabPage.Text = "Общее";
             this.generalTabPage.UseVisualStyleBackColor = true;
             // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.customPathSelectButton);
+            this.panel1.Controls.Add(this.customPathTextBox);
+            this.panel1.Controls.Add(this.customExtractPathRadioButton);
+            this.panel1.Controls.Add(this.extractInTempRadioButton);
+            this.panel1.Location = new System.Drawing.Point(8, 34);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(317, 84);
+            this.panel1.TabIndex = 2;
+            // 
+            // customPathSelectButton
+            // 
+            this.customPathSelectButton.Enabled = false;
+            this.customPathSelectButton.Location = new System.Drawing.Point(282, 57);
+            this.customPathSelectButton.Name = "customPathSelectButton";
+            this.customPathSelectButton.Size = new System.Drawing.Size(30, 23);
+            this.customPathSelectButton.TabIndex = 3;
+            this.customPathSelectButton.Text = "...";
+            this.customPathSelectButton.UseVisualStyleBackColor = true;
+            this.customPathSelectButton.Click += new System.EventHandler(this.customPathSelectButton_Click);
+            // 
+            // customPathTextBox
+            // 
+            this.customPathTextBox.Enabled = false;
+            this.customPathTextBox.Location = new System.Drawing.Point(8, 58);
+            this.customPathTextBox.Name = "customPathTextBox";
+            this.customPathTextBox.Size = new System.Drawing.Size(270, 20);
+            this.customPathTextBox.TabIndex = 2;
+            // 
+            // customExtractPathRadioButton
+            // 
+            this.customExtractPathRadioButton.AutoSize = true;
+            this.customExtractPathRadioButton.Location = new System.Drawing.Point(8, 34);
+            this.customExtractPathRadioButton.Name = "customExtractPathRadioButton";
+            this.customExtractPathRadioButton.Size = new System.Drawing.Size(115, 17);
+            this.customExtractPathRadioButton.TabIndex = 1;
+            this.customExtractPathRadioButton.Text = "Путь распаковки:";
+            this.customExtractPathRadioButton.UseVisualStyleBackColor = true;
+            this.customExtractPathRadioButton.CheckedChanged += new System.EventHandler(this.customExtractPathRadioButton_CheckedChanged);
+            // 
+            // extractInTempRadioButton
+            // 
+            this.extractInTempRadioButton.AutoSize = true;
+            this.extractInTempRadioButton.Checked = true;
+            this.extractInTempRadioButton.Location = new System.Drawing.Point(8, 11);
+            this.extractInTempRadioButton.Name = "extractInTempRadioButton";
+            this.extractInTempRadioButton.Size = new System.Drawing.Size(208, 17);
+            this.extractInTempRadioButton.TabIndex = 0;
+            this.extractInTempRadioButton.TabStop = true;
+            this.extractInTempRadioButton.Text = "Путь распаковки: Временная папка";
+            this.extractInTempRadioButton.UseVisualStyleBackColor = true;
+            this.extractInTempRadioButton.CheckedChanged += new System.EventHandler(this.extractInTempRadioButton_CheckedChanged);
+            // 
             // openInExplorerCheckBox
             // 
             this.openInExplorerCheckBox.AutoSize = true;
+            this.openInExplorerCheckBox.Checked = true;
+            this.openInExplorerCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.openInExplorerCheckBox.Location = new System.Drawing.Point(8, 11);
             this.openInExplorerCheckBox.Name = "openInExplorerCheckBox";
             this.openInExplorerCheckBox.Size = new System.Drawing.Size(290, 17);
@@ -87,61 +143,7 @@ namespace ZipAsDisk
             this.vhdTabPage.Text = "VHD";
             this.vhdTabPage.UseVisualStyleBackColor = true;
             // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.customPathSelectButton);
-            this.panel1.Controls.Add(this.customPathTextBox);
-            this.panel1.Controls.Add(this.customExtractPathRadioButton);
-            this.panel1.Controls.Add(this.extractInTempRadioButton);
-            this.panel1.Location = new System.Drawing.Point(8, 34);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(317, 84);
-            this.panel1.TabIndex = 2;
-            // 
-            // extractInTempRadioButton
-            // 
-            this.extractInTempRadioButton.AutoSize = true;
-            this.extractInTempRadioButton.Checked = true;
-            this.extractInTempRadioButton.Location = new System.Drawing.Point(8, 11);
-            this.extractInTempRadioButton.Name = "extractInTempRadioButton";
-            this.extractInTempRadioButton.Size = new System.Drawing.Size(208, 17);
-            this.extractInTempRadioButton.TabIndex = 0;
-            this.extractInTempRadioButton.TabStop = true;
-            this.extractInTempRadioButton.Text = "Путь распаковки: Временная папка";
-            this.extractInTempRadioButton.UseVisualStyleBackColor = true;
-            this.extractInTempRadioButton.CheckedChanged += new System.EventHandler(this.extractInTempRadioButton_CheckedChanged);
-            // 
-            // customExtractPathRadioButton
-            // 
-            this.customExtractPathRadioButton.AutoSize = true;
-            this.customExtractPathRadioButton.Location = new System.Drawing.Point(8, 34);
-            this.customExtractPathRadioButton.Name = "customExtractPathRadioButton";
-            this.customExtractPathRadioButton.Size = new System.Drawing.Size(115, 17);
-            this.customExtractPathRadioButton.TabIndex = 1;
-            this.customExtractPathRadioButton.Text = "Путь распаковки:";
-            this.customExtractPathRadioButton.UseVisualStyleBackColor = true;
-            this.customExtractPathRadioButton.CheckedChanged += new System.EventHandler(this.customExtractPathRadioButton_CheckedChanged);
-            // 
-            // customPathTextBox
-            // 
-            this.customPathTextBox.Enabled = false;
-            this.customPathTextBox.Location = new System.Drawing.Point(8, 58);
-            this.customPathTextBox.Name = "customPathTextBox";
-            this.customPathTextBox.Size = new System.Drawing.Size(270, 20);
-            this.customPathTextBox.TabIndex = 2;
-            // 
-            // customPathSelectButton
-            // 
-            this.customPathSelectButton.Enabled = false;
-            this.customPathSelectButton.Location = new System.Drawing.Point(282, 57);
-            this.customPathSelectButton.Name = "customPathSelectButton";
-            this.customPathSelectButton.Size = new System.Drawing.Size(30, 23);
-            this.customPathSelectButton.TabIndex = 3;
-            this.customPathSelectButton.Text = "...";
-            this.customPathSelectButton.UseVisualStyleBackColor = true;
-            this.customPathSelectButton.Click += new System.EventHandler(this.customPathSelectButton_Click);
-            // 
-            // SettngsForm
+            // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -150,8 +152,9 @@ namespace ZipAsDisk
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "SettngsForm";
+            this.Name = "SettingsForm";
             this.Text = "Настройки";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SettingsForm_FormClosing);
             this.settingsTabs.ResumeLayout(false);
             this.generalTabPage.ResumeLayout(false);
             this.generalTabPage.PerformLayout();
