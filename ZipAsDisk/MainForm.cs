@@ -37,6 +37,23 @@ namespace ZipAsDisk
             return Settings.settings.ExtractPath == "Temp" ? Path.GetTempPath() + "zipasdisk_extract" : Settings.settings.ExtractPath;
         }
 
+        public string GetDiskImagesPath()
+        {
+            if(Settings.settings.DiskImagesPath == "Temp")
+            {
+                Directory.CreateDirectory(Path.GetTempPath() + "zipasdisk_disks");
+                return Path.GetTempPath() + "zipasdisk_disks";
+            }
+            return Settings.settings.DiskImagesPath;
+        }
+
+        public void RemoveDiskImages()
+        {
+            statusLabel.Text = "Удаление образов дисков...";
+            FileSystem.DeleteDirectory(GetDiskImagesPath(), UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently, UICancelOption.DoNothing);
+            statusLabel.Text = "Готово";
+        }
+
 
         public void MakeISO(string archivePath, string vhdPath)
         {
@@ -154,14 +171,14 @@ namespace ZipAsDisk
         private void openArchive_FileOk(object sender, CancelEventArgs e)
         {
             statusLabel.Text = "Размонтирование диска...";
-            Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.vhd");
+            Dismount(AppDomain.CurrentDomain.BaseDirectory + "\\output.vhd");
             statusLabel.Text = "Создание VHD";
-            MakeVHD(openArchive.FileName, "output.vhd");
+            MakeVHD(openArchive.FileName, GetDiskImagesPath() + "\\output.vhd");
             archivePath = openArchive.FileName;
             statusLabel.Text = "Монтирование...";
-            Mount(AppDomain.CurrentDomain.BaseDirectory + "output.vhd");
+            Mount(GetDiskImagesPath() + "\\output.vhd");
             statusLabel.Text = "Готово";
-            diskArchiveChangeWatcher.EnableRaisingEvents = true;
+            diskArchiveChangeWatcher.EnableRaisingEvents = Settings.settings.EditArchiveInRealTime;
         }
 
         private void openArchiveButton_Click(object sender, EventArgs e)
@@ -172,19 +189,20 @@ namespace ZipAsDisk
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             statusLabel.Text = "Размонтирование дисков...";
-            Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.vhd");
-            Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.iso");
+            Dismount(GetDiskImagesPath() + "\\output.vhd");
+            Dismount(GetDiskImagesPath() + "\\output.iso");
+            RemoveDiskImages();
         }
 
         private void openArchiveAsIso_FileOk(object sender, CancelEventArgs e)
         {
             statusLabel.Text = "Размонтирование диска...";
-            Dismount(AppDomain.CurrentDomain.BaseDirectory + "output.iso");
+            Dismount(GetDiskImagesPath() + "\\output.iso");
             statusLabel.Text = "Создание ISO";
-            MakeISO(openArchiveAsIso.FileName, "output.iso");
+            MakeISO(openArchiveAsIso.FileName, GetDiskImagesPath() + "\\output.iso");
             FileSystem.DeleteDirectory(GetExtractPath(), UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
             statusLabel.Text = "Монтирование...";
-            Mount(AppDomain.CurrentDomain.BaseDirectory + "output.iso", true);
+            Mount(GetDiskImagesPath() + "\\output.iso", true);
             statusLabel.Text = "Готово";
         }
 
@@ -217,6 +235,7 @@ namespace ZipAsDisk
                     if(e.ChangeType == WatcherChangeTypes.Renamed)
                     {
                         RenamedEventArgs renamedEvent = (RenamedEventArgs)e;
+                        //zip.GetEntry(renamedEvent.OldFullPath.Remove(0, 3).Replace('\\', '/')).
                         FileAttributes attr = FileAttributes.Normal;
                         try
                         {

@@ -27,6 +27,14 @@ namespace ZipAsDisk
                 customPathTextBox.Text = s.ExtractPath;
                 customExtractPathRadioButton.Checked = true;
             }
+            if(s.DiskImagesPath == "Temp")
+                diskImagesPathTempRadioButton.Checked = true;
+            else
+            {
+                customDiskImagesPath.Text = s.ExtractPath;
+                customDiskImagesPathRadioButton.Checked = true;
+            }
+            archiveEditInRealTimeCheckBox.Checked = s.EditArchiveInRealTime;
         }
 
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
@@ -71,7 +79,27 @@ namespace ZipAsDisk
             Settings s = Settings.settings;
             s.OpenInExplorer = openInExplorerCheckBox.Checked;
             s.ExtractPath = extractInTempRadioButton.Checked ? "Temp" : customPathTextBox.Text;
+            s.EditArchiveInRealTime = archiveEditInRealTimeCheckBox.Checked;
             Settings.SaveSettings();
+        }
+
+        private void diskPathSelect_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog
+            {
+                InitialDirectory = customDiskImagesPath.Text,
+                IsFolderPicker = true
+            };
+            if(dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                customDiskImagesPath.Text = dialog.FileName;
+            }
+        }
+
+        private void customDiskImagesPathRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            customDiskImagesPath.Enabled = customDiskImagesPathRadioButton.Checked;
+            customDiskImagesPathSelect.Enabled = customDiskImagesPathRadioButton.Checked;
         }
     }
     public class Settings
@@ -80,6 +108,10 @@ namespace ZipAsDisk
         public bool OpenInExplorer { get; set; } = true;
         [JsonProperty]
         public string ExtractPath { get; set; } = "Temp";
+        [JsonProperty]
+        public string DiskImagesPath { get; set; } = "Temp";
+        [JsonProperty]
+        public bool EditArchiveInRealTime { get; set; } = true;
 
         public static Settings settings = new Settings();
 
