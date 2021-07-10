@@ -171,7 +171,7 @@ namespace ZipAsDisk
         private void openArchive_FileOk(object sender, CancelEventArgs e)
         {
             statusLabel.Text = "Размонтирование диска...";
-            Dismount(AppDomain.CurrentDomain.BaseDirectory + "\\output.vhd");
+            Dismount(GetDiskImagesPath() + "\\output.vhd");
             statusLabel.Text = "Создание VHD";
             MakeVHD(openArchive.FileName, GetDiskImagesPath() + "\\output.vhd");
             archivePath = openArchive.FileName;
@@ -235,13 +235,9 @@ namespace ZipAsDisk
                     if(e.ChangeType == WatcherChangeTypes.Renamed)
                     {
                         RenamedEventArgs renamedEvent = (RenamedEventArgs)e;
-                        //zip.GetEntry(renamedEvent.OldFullPath.Remove(0, 3).Replace('\\', '/')).
-                        FileAttributes attr = FileAttributes.Normal;
-                        try
-                        {
-                            attr = File.GetAttributes(renamedEvent.FullPath);
-                        }
-                        catch(Exception) { }
+                        ZipEntry entry = zip.GetEntry(renamedEvent.OldFullPath.Remove(0, 3).Replace('\\', '/'));
+                        zip.Add(e.FullPath);
+                        zip.Delete(entry);
                         /*if(attr.HasFlag(FileAttributes.Directory))
                             zip.UpdateDirectory(renamedEvent.FullPath).FileName = renamedEvent.Name;
                         else
@@ -260,7 +256,7 @@ namespace ZipAsDisk
                 {
                     zip.CommitUpdate();
                 }
-                catch(IOException ex)
+                catch(Exception ex) when ex is UnauthorizedAccessException or ex is IOException
                 {
                     MessageBox.Show("Ошибка при сохранении архива: " + ex.Message, "Ошибка сохранения", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     statusLabel.Text = "Ошибка сохранения";
