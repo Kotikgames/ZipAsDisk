@@ -79,6 +79,7 @@ namespace ZipAsDisk
             Settings s = Settings.settings;
             s.OpenInExplorer = openInExplorerCheckBox.Checked;
             s.ExtractPath = extractInTempRadioButton.Checked ? "Temp" : customPathTextBox.Text;
+            s.DiskImagesPath = diskImagesPathTempRadioButton.Checked ? "Temp" : customDiskImagesPath.Text;
             s.EditArchiveInRealTime = archiveEditInRealTimeCheckBox.Checked;
             Settings.SaveSettings();
         }

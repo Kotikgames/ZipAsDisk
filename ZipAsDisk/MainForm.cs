@@ -50,7 +50,11 @@ namespace ZipAsDisk
         public void RemoveDiskImages()
         {
             statusLabel.Text = "Удаление образов дисков...";
-            FileSystem.DeleteDirectory(GetDiskImagesPath(), UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently, UICancelOption.DoNothing);
+            string path = GetDiskImagesPath();
+            if(File.Exists(path + "\\output.vhd"))
+                FileSystem.DeleteFile(path + "\\output.vhd", UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently, UICancelOption.DoNothing);
+            if(File.Exists(path + "\\output.iso"))
+                FileSystem.DeleteFile(path + "\\output.iso", UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently, UICancelOption.DoNothing);
             statusLabel.Text = "Готово";
         }
 
@@ -90,7 +94,7 @@ namespace ZipAsDisk
             /*foreach(string f in Directory.GetFiles(GetExtractPath(), "*.*", System.IO.SearchOption.AllDirectories))
                 using(FileStream fs = File.OpenRead(f))
                     filesSize += fs.Length; */
-            long diskSize =  60 * 1024 * 1024; // ?
+            long diskSize =  125 * 1024 * 1024; // ?
             //MessageBox.Show((diskSize / 1024).ToString());
             using(var fs = new FileStream(vhdPath, FileMode.OpenOrCreate))
             {
