@@ -59,7 +59,7 @@ namespace ZipAsDisk
         }
 
 
-        public void MakeISO(string archivePath, string isoPath)
+        public bool MakeISO(string archivePath, string isoPath)
         {
             CDBuilder builder = new CDBuilder();
             builder.UseJoliet = true;
@@ -71,7 +71,7 @@ namespace ZipAsDisk
             {
                 MessageBox.Show("Не удалось найти путь: " + Path.GetDirectoryName(isoPath), "Ошибка создания ISO", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 statusLabel.Text = "Ошибка создания";
-                return;
+                return false;
             }
             foreach(string f in Directory.GetFiles(GetExtractPath(), "*.*", System.IO.SearchOption.AllDirectories))
             {
@@ -88,9 +88,10 @@ namespace ZipAsDisk
             builder.Build(isoPath);
             foreach(Stream s in streams)
                 s.Close();
+            return true;
         }
 
-        public void MakeVHD(string archivePath, string vhdPath)
+        public bool MakeVHD(string archivePath, string vhdPath)
         {
             FastZip zip = new FastZip();
             zip.ExtractZip(archivePath, GetExtractPath(), null);
@@ -104,7 +105,7 @@ namespace ZipAsDisk
             if(!Directory.Exists(Path.GetDirectoryName(vhdPath))){
                 MessageBox.Show("Не удалось найти путь: " + Path.GetDirectoryName(vhdPath), "Ошибка создания VHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 statusLabel.Text = "Ошибка создания";
-                return;
+                return false;
             }
             using(var fs = new FileStream(vhdPath, FileMode.OpenOrCreate))
             {
@@ -149,6 +150,7 @@ namespace ZipAsDisk
                 fs.Flush();
             }
             FileSystem.DeleteDirectory(GetExtractPath(), UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+            return true;
         }
 
         public void Mount(string path, bool isIso = false)
@@ -162,6 +164,12 @@ namespace ZipAsDisk
                     command.AddCommand("Get-Disk").AddCommand("Get-Partition");
                 command.AddCommand("Get-Volume");
                 var result = command.Invoke();
+                if(command.HadErrors)
+                {
+                    MessageBox.Show("Не удалось монтировать образ диска: " + command.Streams.Error[0].ToString(), "Ошибка монтирования", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    statusLabel.Text = "Ошибка монтирования";
+                    return;
+                }
                 // Get Drive Letter 
                 string letter = result[0].Properties["DriveLetter"].Value.ToString();
                 if(Settings.settings.OpenInExplorer)
@@ -187,12 +195,14 @@ namespace ZipAsDisk
             statusLabel.Text = "Размонтирование диска...";
             Dismount(GetDiskImagesPath() + "\\output.vhd");
             statusLabel.Text = "Создание VHD";
-            MakeVHD(openArchive.FileName, GetDiskImagesPath() + "\\output.vhd");
-            archivePath = openArchive.FileName;
-            statusLabel.Text = "Монтирование...";
-            Mount(GetDiskImagesPath() + "\\output.vhd");
-            statusLabel.Text = "Готово";
-            diskArchiveChangeWatcher.EnableRaisingEvents = Settings.settings.EditArchiveInRealTime;
+            if(MakeVHD(openArchive.FileName, GetDiskImagesPath() + "\\output.vhd"))
+            {
+                archivePath = openArchive.FileName;
+                statusLabel.Text = "Монтирование...";
+                Mount(GetDiskImagesPath() + "\\output.vhd");
+                statusLabel.Text = "Готово";
+                diskArchiveChangeWatcher.EnableRaisingEvents = Settings.settings.EditArchiveInRealTime;
+            }
         }
 
         private void openArchiveButton_Click(object sender, EventArgs e)
@@ -213,11 +223,13 @@ namespace ZipAsDisk
             statusLabel.Text = "Размонтирование диска...";
             Dismount(GetDiskImagesPath() + "\\output.iso");
             statusLabel.Text = "Создание ISO";
-            MakeISO(openArchiveAsIso.FileName, GetDiskImagesPath() + "\\output.iso");
-            FileSystem.DeleteDirectory(GetExtractPath(), UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-            statusLabel.Text = "Монтирование...";
-            Mount(GetDiskImagesPath() + "\\output.iso", true);
-            statusLabel.Text = "Готово";
+            if(MakeISO(openArchiveAsIso.FileName, GetDiskImagesPath() + "\\output.iso"))
+            {
+                FileSystem.DeleteDirectory(GetExtractPath(), UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+                statusLabel.Text = "Монтирование...";
+                Mount(GetDiskImagesPath() + "\\output.iso", true);
+                statusLabel.Text = "Готово";
+            }
         }
 
         private void openArchiveAsIsoButton_Click(object sender, EventArgs e)
