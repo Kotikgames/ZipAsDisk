@@ -256,7 +256,7 @@ namespace ZipAsDisk
                 {
                     zip.CommitUpdate();
                 }
-                catch(Exception ex) when ex is UnauthorizedAccessException or ex is IOException
+                catch(Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
                 {
                     MessageBox.Show("Ошибка при сохранении архива: " + ex.Message, "Ошибка сохранения", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     statusLabel.Text = "Ошибка сохранения";
