@@ -59,15 +59,20 @@ namespace ZipAsDisk
         }
 
 
-        public void MakeISO(string archivePath, string vhdPath)
+        public void MakeISO(string archivePath, string isoPath)
         {
             CDBuilder builder = new CDBuilder();
             builder.UseJoliet = true;
             builder.VolumeIdentifier = "Архив";
             FastZip zip = new FastZip();
-            MessageBox.Show(GetExtractPath());
             zip.ExtractZip(archivePath, GetExtractPath(), null);
             List<Stream> streams = new List<Stream>();
+            if(!Directory.Exists(Path.GetDirectoryName(isoPath)))
+            {
+                MessageBox.Show("Не удалось найти путь: " + Path.GetDirectoryName(isoPath), "Ошибка создания ISO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                statusLabel.Text = "Ошибка создания";
+                return;
+            }
             foreach(string f in Directory.GetFiles(GetExtractPath(), "*.*", System.IO.SearchOption.AllDirectories))
             {
                 string dir = Path.GetDirectoryName(f);
@@ -80,7 +85,7 @@ namespace ZipAsDisk
                 streams.Add(s);
                 builder.AddFile(dir + '\\' + Path.GetFileName(f), s);
             }
-            builder.Build(vhdPath);
+            builder.Build(isoPath);
             foreach(Stream s in streams)
                 s.Close();
         }
@@ -95,7 +100,12 @@ namespace ZipAsDisk
                 using(FileStream fs = File.OpenRead(f))
                     filesSize += fs.Length; */
             long diskSize =  125 * 1024 * 1024; // ?
-            //MessageBox.Show((diskSize / 1024).ToString());
+                                                //MessageBox.Show((diskSize / 1024).ToString());
+            if(!Directory.Exists(Path.GetDirectoryName(vhdPath))){
+                MessageBox.Show("Не удалось найти путь: " + Path.GetDirectoryName(vhdPath), "Ошибка создания VHD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                statusLabel.Text = "Ошибка создания";
+                return;
+            }
             using(var fs = new FileStream(vhdPath, FileMode.OpenOrCreate))
             {
                 VirtualDisk destDisk = Disk.InitializeDynamic(fs, DiscUtils.Streams.Ownership.None, diskSize);
